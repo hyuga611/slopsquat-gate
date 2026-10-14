@@ -1,0 +1,40 @@
+{
+  "name": "slopsquat-gate",
+  "version": "0.1.0",
+  "description": "Fail CI when a pull request adds a dependency that does not exist, was first published days ago, or was taken down as malware: the package names AI coding assistants make up. npm, PyPI and crates.io. Zero-dependency.",
+  "type": "module",
+  "bin": {
+    "slopsquat-gate": "src/check.mjs"
+  },
+  "exports": {
+    ".": "./src/gate.mjs"
+  },
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "test": "node --test"
+  },
+  "keywords": [
+    "slopsquatting",
+    "package-hallucination",
+    "supply-chain",
+    "dependencies",
+    "security",
+    "npm",
+    "pypi",
+    "crates",
+    "ci",
+    "github-actions",
+    "ai"
+  ],
+  "license": "MIT",
+  "author": "hyuga611",
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hyuga611/slopsquat-gate.git"
+  }
+}
