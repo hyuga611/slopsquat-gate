@@ -1,6 +1,6 @@
 {
   "name": "slopsquat-gate",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Fail CI when a pull request adds a dependency that does not exist, was first published days ago, or was taken down as malware: the package names AI coding assistants make up. npm, PyPI and crates.io. Zero-dependency.",
   "type": "module",
   "bin": {
