@@ -52,7 +52,10 @@ export function pool(limit, spacingMs = 0) {
     const wait = Math.max(0, nextStart - Date.now());
     nextStart = Math.max(nextStart, Date.now()) + spacingMs;
     sleep(wait)
-      .then(task)
+      .then(() => {
+        nextStart = Math.max(nextStart, Date.now() + spacingMs);
+        return task();
+      })
       .then(resolve, reject)
       .finally(() => {
         active--;

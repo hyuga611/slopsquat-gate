@@ -59,7 +59,10 @@ test('lookup names the client, as crates.io requires', async () => {
 test('crates.io is asked one crate at a time, a second apart', async () => {
   const run = pool(1, 50);
   const starts = [];
-  await Promise.all([1, 2, 3].map(() => run(async () => starts.push(Date.now()))));
+  const all = Promise.all([1, 2, 3].map(() => run(async () => starts.push(Date.now()))));
+  const busyUntil = Date.now() + 20;
+  while (Date.now() < busyUntil);
+  await all;
   assert.ok(starts[1] - starts[0] >= 45 && starts[2] - starts[1] >= 45, starts.join(' '));
   assert.deepEqual([ECOSYSTEMS.crates.concurrency, ECOSYSTEMS.crates.spacingMs], [1, 1000]);
 });
