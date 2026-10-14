@@ -1,0 +1,65 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        node: [18, 20, 22, 24]
+        include:
+          - os: windows-latest
+            node: 22
+          - os: macos-latest
+            node: 22
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - run: npm test
+      - name: A made-up dependency fails and a real one passes, against the live registries, as installed from the package
+        shell: bash
+        run: |
+          tgz="$PWD/$(npm pack --silent)"
+          gate() { npx --yes --package="$tgz" slopsquat-gate "$repo" --base main > /dev/null; }
+          repo=$(mktemp -d)
+          # A fresh name each run, so that nobody can make this step pass by registering it.
+          made_up="slopsquat-gate-ci-$RANDOM$RANDOM-not-a-package"
+          git -C "$repo" init -q -b main
+          git -C "$repo" config user.name ci
+          git -C "$repo" config user.email ci@example.invalid
+          echo '{ "dependencies": { "express": "^4.21.0" } }' > "$repo/package.json"
+          echo 'requests==2.32.3' > "$repo/requirements.txt"
+          git -C "$repo" add -A && git -C "$repo" commit -qm main && git -C "$repo" switch -qc change
+          echo '{ "dependencies": { "express": "^4.21.0", "zod": "^3.23.8" } }' > "$repo/package.json"
+          printf 'requests==2.32.3\n%s\n' "$made_up" > "$repo/requirements.txt"
+          git -C "$repo" commit -qam change
+          set +e
+          gate; with_made_up=$?
+          echo 'requests==2.32.3' > "$repo/requirements.txt"
+          git -C "$repo" commit -qam fix
+          gate; without=$?
+          echo "with $made_up exit=$with_made_up, without it exit=$without"
+          test "$with_made_up" = 1 && test "$without" = 0
+
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node src/check.mjs
